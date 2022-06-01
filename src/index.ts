@@ -236,7 +236,7 @@ const main = async () => {
   notification.include_external_user_ids = ["2"];
 
   await OneSignalclient.createNotification(notification, {
-    Authorization: "Basic OGFmMzZiYTEtZWY4MC00NjE1LWI2NWYtMzdlMmEzMDcxZDg5",
+    Authorization: "Basic " + process.env.ONESIGNAL_APP_KEY,
   });
 };
 
