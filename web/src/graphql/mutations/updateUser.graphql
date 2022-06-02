@@ -1,0 +1,14 @@
+mutation UpdateUser(
+  $id: Int!
+  $name: String!
+  $bio: String!
+  $image: String!
+  $file: Upload
+) {
+  updateUser(id: $id, name: $name, bio: $bio, image: $image, file: $file) {
+    id
+    name
+    bio
+    username
+  }
+}

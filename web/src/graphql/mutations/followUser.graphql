@@ -1,0 +1,7 @@
+
+mutation FollowUser($username: String!) {
+  followUser(username: $username) {
+    ...RegularUserResponse
+  }
+}
+

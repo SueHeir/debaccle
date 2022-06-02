@@ -1,0 +1,3 @@
+mutation RegisterEmail($token: String!) {
+  registerEmail(token: $token)
+}

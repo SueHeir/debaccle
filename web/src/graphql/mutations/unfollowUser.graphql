@@ -1,0 +1,7 @@
+
+mutation UnFollowUser($username: String!) {
+  unfollowUser(username: $username) {
+    ...RegularUserResponse
+  }
+}
+

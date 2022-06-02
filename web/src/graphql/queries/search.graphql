@@ -1,0 +1,10 @@
+query Search($search: String!) {
+  search(search: $search) {
+    users {
+      ...RegularUser
+    }
+    posts {
+      ...PostSnippet
+    }
+  }
+}

@@ -1,0 +1,21 @@
+fragment RegularPostResponse on PostResponse {
+  errors {
+    ...RegularError2
+  }
+  post {
+    ...PostSnippet
+  }
+}
+
+
+
+fragment RegularCommentResponse on CommentResponse {
+  errors {
+    ...RegularError3
+  }
+  comment {
+    id
+    postId
+    text
+  }
+}

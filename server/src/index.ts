@@ -233,7 +233,7 @@ const main = async () => {
   notification.headings = {
     en: "heading is here",
   };
-  notification.include_external_user_ids = ["2"];
+  notification.includeExternalUserIds = ["2"];
 
   await OneSignalclient.createNotification(notification, {
     Authorization: "Basic " + process.env.ONESIGNAL_APP_KEY,

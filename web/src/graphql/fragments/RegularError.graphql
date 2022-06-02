@@ -1,0 +1,12 @@
+fragment RegularError on FieldError {
+  field
+  message
+}
+fragment RegularError2 on FieldError2 {
+  field
+  message
+}
+fragment RegularError3 on CommentFieldError {
+  field
+  message
+}

@@ -1,0 +1,29 @@
+query Posts(
+  $limit: Int!
+  $cursor: String
+  $users: [String!]
+  $userids: [Int!]
+  $showExpired: Boolean
+) {
+  posts(
+    limit: $limit
+    cursor: $cursor
+    users: $users
+    userids: $userids
+    showExpired: $showExpired
+  ) {
+    hasMore
+    posts {
+      ...PostSnippet
+    }
+  }
+}
+
+query Trending($limit: Int!, $cursor: String, $anti: Boolean!) {
+  trending(limit: $limit, cursor: $cursor, anti: $anti) {
+    hasMore
+    posts {
+      ...PostSnippet
+    }
+  }
+}

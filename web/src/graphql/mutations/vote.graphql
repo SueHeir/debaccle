@@ -1,0 +1,12 @@
+mutation Vote($value: Int!, $postId: Int!) {
+  vote(value: $value, postId: $postId) {
+    ...PostSnippet
+  }
+}
+
+
+mutation VoteComment($value: Int!, $commentId: Int!) {
+  voteComment(value: $value, commentId: $commentId) {
+    ...CommentSnippet
+  }
+}

@@ -1,0 +1,7 @@
+
+mutation UnHateUser($username: String!) {
+  unhateUser(username: $username) {
+    ...RegularUserResponse
+  }
+}
+

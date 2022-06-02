@@ -1,0 +1,26 @@
+query User($id: Int, $username: String) {
+  user(id: $id, username: $username) {
+    id
+    username
+    name
+    bio
+    credits
+    image
+    followers
+    following
+    haters
+    hating
+  }
+}
+query UserFollowHateInfo($id: Int, $username: String, $type: String!) {
+  userFollowHateInfo(id: $id, username: $username, type: $type) {
+    id
+    username
+    name
+    image
+    followers
+    following
+    haters
+    hating
+  }
+}

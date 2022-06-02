@@ -1,0 +1,25 @@
+fragment PostSnippet on Post {
+  id
+  createdAt
+  updatedAt
+  title
+  upvotes
+  downvotes
+  textSnippet
+  voteStatus
+  text
+  creatorId
+  commentCount
+  image
+  locked
+  creator {
+    id
+    username
+    name
+    image
+  }
+
+  comments {
+    ...CommentSnippet
+  }
+}
