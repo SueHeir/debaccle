@@ -13,7 +13,7 @@ export const NotificationMenuItem: React.FC<PostProps> = ({ id }) => {
 
   useEffect(() => {
     getInfo();
-  }, []);
+  }, [user_ID, isEnabled]);
 
   const getInfo = async () => {
     const e = await OneSignal.isPushNotificationsEnabled();
@@ -27,7 +27,9 @@ export const NotificationMenuItem: React.FC<PostProps> = ({ id }) => {
     <MenuItem
       w={"100%"}
       onClick={async () => {
-        OneSignal.showNativePrompt();
+        OneSignal.showNativePrompt().then((values) => {
+          console.log(values);
+        });
       }}
     >
       Allow Notifications

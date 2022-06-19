@@ -21,6 +21,8 @@ export const Layout: React.FC<LayoutProps> = ({
       <NavBar meQuery={meQuery} />
 
       <Wrapper variant={variant}>{children}</Wrapper>
+
+      <Box p={20}></Box>
     </>
   );
 };

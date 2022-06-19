@@ -45,7 +45,7 @@ const Register: React.FC<registerProps> = ({}) => {
                 description:
                   "We've created your account for you. Please Check your spam for an email. Varifing your email is required to get Points!",
                 status: "success",
-                duration: 9000,
+                duration: 11000,
                 isClosable: true,
               });
               router.push("/");

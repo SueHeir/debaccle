@@ -78,7 +78,7 @@ export const EditFollowHateButtons: React.FC<EditDeletePostButtonsProps> = ({
             return;
           }}
         >
-          Follow
+          Support
         </Button>
         <Button
           m={2}
@@ -115,7 +115,7 @@ export const EditFollowHateButtons: React.FC<EditDeletePostButtonsProps> = ({
             return;
           }}
         >
-          Hate
+          Criticize
         </Button>
       </Box>
     );
@@ -164,7 +164,7 @@ export const EditFollowHateButtons: React.FC<EditDeletePostButtonsProps> = ({
             return;
           }}
         >
-          UnFollow
+          UnSupport
         </Button>
       );
     }
@@ -211,7 +211,7 @@ export const EditFollowHateButtons: React.FC<EditDeletePostButtonsProps> = ({
             return;
           }}
         >
-          UnHate
+          UnCriticize
         </Button>
       );
     }
@@ -230,7 +230,11 @@ export const EditFollowHateButtons: React.FC<EditDeletePostButtonsProps> = ({
       );
 
       if (!meData.data.me.emailvarified) {
-        editFollowButton = <Box m={2}>Check Spam Email to register Email</Box>;
+        editFollowButton = (
+          <Box ml={"auto"} m={2} maxW={40}>
+            Check spam for email
+          </Box>
+        );
       }
     }
   }

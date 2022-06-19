@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import produce from "immer";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MeQueryResult,
   PostsDocument,
@@ -56,12 +56,16 @@ interface LayoutProps {
   postsQueryResults: PostsQueryResult | null;
   trendingQueryResults: TrendingQueryResult | null;
   meQuery: MeQueryResult;
+  fetchMorePosts: boolean;
+  swiper?: any;
 }
 
 export const Posts: React.FC<LayoutProps> = ({
   postsQueryResults,
   trendingQueryResults,
   meQuery,
+  fetchMorePosts,
+  swiper,
 }) => {
   const [showCommentField, setShowCommentField] = useState<number | null>(null);
   const [commentToQuery, setCommentToQuery] = useState<number>(-1);
@@ -106,13 +110,67 @@ export const Posts: React.FC<LayoutProps> = ({
     loading = trendingQueryResults.loading;
   }
 
-  // useEffect(() => {
-  //   // console.log("yoyoyo")
-  //   refetch();
-  // }, [usids]);
+  useEffect(() => {
+    if (!fetchMorePosts) {
+      // console.log("false");
+      return;
+    }
+    if (!data.hasMore) {
+      // console.log("no data");
+      return;
+    }
+
+    if (trendingQueryResults) {
+      if (trendingQueryResults.data?.trending?.posts) {
+        let posts = trendingQueryResults.data.trending.posts;
+
+        let lastCreated = 0;
+        for (var i = 1; i < posts.length; i++) {
+          if (posts[i].createdAt < posts[lastCreated].createdAt) {
+            lastCreated = i;
+          }
+        }
+        trendingQueryResults.fetchMore({
+          variables: {
+            limit: trendingQueryResults.variables?.limit,
+            cursor: posts[lastCreated].createdAt,
+            anti: trendingQueryResults.variables?.anti,
+          },
+          updateQuery: (previousValue, { fetchMoreResult }): TrendingQuery => {
+            // console.log("ypdateQuery");
+            if (!fetchMoreResult) {
+              return previousValue as TrendingQuery;
+            }
+            // console.log("rerturn");
+            return {
+              __typename: "Query",
+              trending: {
+                __typename: "PaginatedPosts",
+                hasMore: (fetchMoreResult as TrendingQuery).trending.hasMore,
+                posts: [
+                  ...(previousValue as TrendingQuery).trending.posts,
+                  ...(fetchMoreResult as TrendingQuery).trending.posts,
+                ],
+              },
+            };
+          },
+        });
+
+        if (swiper) {
+          setTimeout(() => {
+            swiper.updateAutoHeight();
+          }, 200);
+          setTimeout(() => {
+            swiper.updateAutoHeight();
+          }, 700);
+        }
+      }
+    }
+  }, [fetchMorePosts]);
+
   return (
     <>
-      {!data || loading ? (
+      {!data ? (
         <Stack spacing={0} borderWidth="1px">
           <Box p={40} borderBottomWidth="1px"></Box>
           <Box p={40} borderBottomWidth="1px"></Box>
@@ -413,8 +471,6 @@ export const Posts: React.FC<LayoutProps> = ({
                       lastCreated = i;
                     }
                   }
-
-                  // console.log("fetchmore");
                   trendingQueryResults.fetchMore({
                     variables: {
                       limit: trendingQueryResults.variables?.limit,
@@ -447,8 +503,6 @@ export const Posts: React.FC<LayoutProps> = ({
                   });
                 }
               }
-
-              // console.log("wtf");
               return;
             }}
             isLoading={

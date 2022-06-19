@@ -4,6 +4,7 @@ import { Input, InputGroup, InputLeftElement } from "@chakra-ui/input";
 import { Box, Flex, HStack, Link, Stack, VStack } from "@chakra-ui/layout";
 import { Collapse, IconButton, Text, useDisclosure } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
+import Head from "next/head";
 import React, { useState } from "react";
 import { EditFollowHateButtons } from "../components/EditFollowHateButtons";
 import { Layout } from "../components/Layout";
@@ -221,31 +222,40 @@ export const Explore: React.FC<{}> = ({}) => {
   }
 
   return (
-    <Layout meQuery={meQuery}>
-      <Formik
-        initialValues={{ search: "" }}
-        onSubmit={async (values, { setErrors }) => {}}
-      >
-        <Form>
-          <InputGroup>
-            <InputLeftElement pointerEvents="none">
-              <SearchIcon color="gray.300" />
-            </InputLeftElement>
-            <Input
-              type="text"
-              name="search"
-              placeholder="Search Users or Post"
-              onChange={(e) => {
-                // console.log(e.target.value);
-                setSearchString(e.target.value);
-              }}
-            />
-          </InputGroup>
-        </Form>
-      </Formik>
-      {userresults}
-      {psotresults}
-    </Layout>
+    <>
+      <Head>
+        <title>Explore Debaccle</title>
+        <meta
+          name="description"
+          content="Explore many opinions and users of debaccle!"
+        ></meta>
+      </Head>
+      <Layout meQuery={meQuery}>
+        <Formik
+          initialValues={{ search: "" }}
+          onSubmit={async (values, { setErrors }) => {}}
+        >
+          <Form>
+            <InputGroup>
+              <InputLeftElement pointerEvents="none">
+                <SearchIcon color="gray.300" />
+              </InputLeftElement>
+              <Input
+                type="text"
+                name="search"
+                placeholder="Search Users or Opinions"
+                onChange={(e) => {
+                  // console.log(e.target.value);
+                  setSearchString(e.target.value);
+                }}
+              />
+            </InputGroup>
+          </Form>
+        </Formik>
+        {userresults}
+        {psotresults}
+      </Layout>
+    </>
   );
 };
 

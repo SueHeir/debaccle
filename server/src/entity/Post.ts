@@ -32,6 +32,14 @@ export class Post extends BaseEntity {
   @Column({ default: "" })
   image: string;
 
+  @Field(() => [String])
+  @Column("text", { array: true, default: [] })
+  topics: string[];
+
+  @Field(() => String)
+  @Column({ default: "opinion" })
+  type: string;
+
   @Field()
   @Column({ type: "int", default: 0 })
   upvotes!: number;
@@ -45,7 +53,7 @@ export class Post extends BaseEntity {
   locked!: boolean;
 
   @Field(() => Int, { nullable: true })
-  voteStatus: number | null; // 1 or -1 or null
+  voteStatus: number | null;
 
   @Field()
   @Column()
@@ -54,6 +62,9 @@ export class Post extends BaseEntity {
   @Field()
   @ManyToOne(() => User, (user) => user.posts)
   creator: User;
+
+  @Column({ type: "float", default: 1 })
+  ratio!: number;
 
   @Field()
   @Column({ type: "int", default: 0 })

@@ -663,10 +663,18 @@ export class UserResolver {
 
     let userToHate = await User.findOneBy({ username: username });
     let userHating = await User.findOneBy({ id: req.session.userId });
-    // console.log(userToHate)
-    // console.log(userHating)
 
     if (userHating && userToHate) {
+      if (userHating?.hating.length >= 100) {
+        return {
+          errors: [
+            {
+              field: "Follow",
+              message: "You can't criticize more an 100 people",
+            },
+          ],
+        };
+      }
       //console.log("inhere")
       if (userToHate.haters.some((folowers) => folowers === userHating?.id)) {
         //console.log("ealready in usr")

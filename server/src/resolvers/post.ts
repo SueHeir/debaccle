@@ -21,7 +21,9 @@ import { ILike, In } from "typeorm";
 import GraphQLUpload from "graphql-upload/GraphQLUpload.js";
 import Upload from "graphql-upload/Upload.js";
 import { v4 } from "uuid";
-// const OneSignal = require("@onesignal/node-onesignal");
+
+import * as OneSignal from "@onesignal/node-onesignal";
+import { Updoot } from "../entity/Updoot";
 
 @InputType()
 class PostInput {
@@ -29,6 +31,10 @@ class PostInput {
   title: string;
   @Field()
   text: string;
+  @Field()
+  type: string;
+  @Field()
+  topics: string[];
 }
 
 @ObjectType()
@@ -78,20 +84,31 @@ export class PostResolver {
   }
 
   @FieldResolver(() => Int, { nullable: true })
-  async voteStatus(
-    @Root() post: Post,
-    @Ctx() { updootLoader, req }: MyContext
-  ) {
+  async voteStatus(@Root() post: Post, @Ctx() { req }: MyContext) {
     if (!req.session.userId) {
       return null;
     }
 
-    const updoot = await updootLoader.load({
-      postId: post.id,
-      userId: req.session.userId,
+    const updoots = await Updoot.createQueryBuilder()
+      .where({
+        postId: post.id,
+        userId: req.session.userId,
+      })
+      .getMany();
+
+    // console.log(updoots);
+
+    if (updoots.length == 0) {
+      return null;
+    }
+    let value = 0;
+
+    updoots.map((updoot) => {
+      value += updoot.value;
     });
 
-    return updoot ? updoot.value : null;
+    // console.log(value);
+    return value;
   }
 
   @Mutation(() => Post)
@@ -99,7 +116,7 @@ export class PostResolver {
   async vote(
     @Arg("postId", () => Int) postId: number,
     @Arg("value", () => Int) value: number,
-    @Ctx() { req }: MyContext
+    @Ctx() { req, data }: MyContext
   ): Promise<Post | null> {
     //const isUpdoot = value !== -1;
     let hating = false;
@@ -127,12 +144,21 @@ export class PostResolver {
       return post;
     }
 
+    await data
+      .getRepository(Updoot)
+      .insert({ postId: postId, userId: userId, value: value });
+
     userDoing.credits -= realValue;
     await User.update({ id: userDoing.id }, { credits: userDoing.credits });
 
     if (!hating) {
       post.upvotes += value;
-      await Post.update({ id: postId }, { upvotes: post.upvotes });
+
+      post.ratio = (post.upvotes + 1) / (-post.downvotes + post.upvotes + 1);
+      await Post.update(
+        { id: postId },
+        { upvotes: post.upvotes, ratio: post.ratio }
+      );
 
       // userReciving.credits += realValue;
 
@@ -142,7 +168,12 @@ export class PostResolver {
       // );
     } else {
       post.downvotes += value;
-      await Post.update({ id: postId }, { downvotes: post.downvotes });
+
+      post.ratio = (post.upvotes + 1) / (-post.downvotes + post.upvotes + 1);
+      await Post.update(
+        { id: postId },
+        { downvotes: post.downvotes, ratio: post.ratio }
+      );
 
       //   if (userReciving.haters.length > 0) {
       //     let otherHaters = userReciving.haters;
@@ -170,6 +201,7 @@ export class PostResolver {
       //   // console.log(haters.raw[0])
       // }
     }
+
     return post;
   }
 
@@ -409,49 +441,21 @@ export class PostResolver {
     qb.andWhere('post."locked" = :lock', {
       lock: false,
     });
-    qb.orderBy({
-      'post."createdAt"': "DESC",
-    }).limit(limit + 5);
-
-    let posts = await qb.getMany();
     if (!anti) {
-      posts.sort((a, b) => {
-        if (a.upvotes < b.upvotes) {
-          return 1;
-        }
-        if (a.upvotes > b.upvotes) {
-          return -1;
-        }
-        return 0;
-      });
-
-      // console.log("posts: ", posts);
-      return {
-        posts: posts.slice(0, realLimit),
-        hasMore: posts.length > realLimit,
-      };
-
-      //console.log(posts)
-    } else if (anti) {
-      posts.sort((a, b) => {
-        if (a.downvotes > b.downvotes) {
-          return 1;
-        }
-        if (a.downvotes < b.downvotes) {
-          return -1;
-        }
-        return 0;
-      });
-
-      return {
-        posts: posts.slice(0, realLimit),
-        hasMore: posts.length > realLimit,
-      };
+      qb.andWhere('post."ratio" >= 0.66');
+    } else {
+      qb.andWhere('post."ratio" < 0.66');
     }
 
+    qb.orderBy({
+      'post."createdAt"': "DESC",
+    }).limit(reaLimitPlusOne);
+
+    let posts = await qb.getMany();
+
     return {
-      posts: [],
-      hasMore: false,
+      posts: posts,
+      hasMore: posts.length === reaLimitPlusOne,
     };
 
     // const qb = getConnection()
@@ -482,7 +486,7 @@ export class PostResolver {
     @Arg("file", () => GraphQLUpload, { nullable: true })
     file: typeof Upload | null,
     @Ctx()
-    { req, data, debaccle_bucket }: MyContext
+    { req, data, debaccle_bucket, OneSignalclient }: MyContext
   ): Promise<PostResponse> {
     console.log("createPost");
     const user = await User.findOneBy({ id: req.session.userId });
@@ -520,6 +524,23 @@ export class PostResolver {
         .where("id IN(:...ids)", { ids: user.followers })
         .set({ credits: () => `credits + ${x}` })
         .execute();
+
+      const notification = new OneSignal.Notification();
+      notification.app_id = process.env.ONESIGNAL_APP_ID;
+      notification.contents = {
+        en: input.title,
+      };
+      notification.headings = {
+        en: "@" + user.username + " just posted an opinion!",
+      };
+
+      let idArrayOfStrings: string[] = [];
+      user.followers.map((num) => {
+        idArrayOfStrings.push(num.toString());
+      });
+      notification.include_external_user_ids = idArrayOfStrings;
+
+      await OneSignalclient.createNotification(notification);
     }
 
     data
@@ -540,6 +561,8 @@ export class PostResolver {
       title: input.title,
       text: input.text,
       image: image,
+      topics: input.topics,
+      type: input.type,
       creatorId: req.session.userId,
     }).save();
 
@@ -561,7 +584,7 @@ export class PostResolver {
       );
     }
 
-    console.log(post.createdAt.toString());
+    // console.log(post.createdAt.toString());
 
     return { post };
   }

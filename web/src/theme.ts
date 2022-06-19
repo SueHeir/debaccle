@@ -1,5 +1,15 @@
 import { extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
+import { BottomNavigationStyleConfig as BottomNavigation } from "chakra-ui-bottom-navigation";
+import { withDefaultStyles } from "chakra-ui-bottom-navigation";
+
+const bottomNavigationOverries = {
+  defaultProps: {
+    variant: "flat",
+    colorScheme: "gray",
+  },
+};
+const MyBottomNavigation = withDefaultStyles(bottomNavigationOverries);
 
 const theme = extendTheme({
   colors: {
@@ -49,6 +59,7 @@ const theme = extendTheme({
     Button: {
       defaultProps: {},
     },
+    BottomNavigation: MyBottomNavigation,
   },
   styles: {
     global: (props: any) => ({

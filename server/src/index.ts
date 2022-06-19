@@ -17,7 +17,7 @@ import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.js";
 import { Post } from "./entity/Post";
 import { User } from "./entity/User";
 import { Storage } from "@google-cloud/storage";
-
+import * as OneSignal from "@onesignal/node-onesignal";
 process.env.TZ = "UTC";
 
 const main = async () => {
@@ -58,8 +58,8 @@ const main = async () => {
   // });
 
   // const users = await AppDataSource.getRepository(User).update(
-  //   { credits: 0, emailvarified: true },
-  //   { credits: 25 }
+  //   { emailvarified: false },
+  //   { credits: 1000, emailvarified: true }
   // );
 
   // console.log(users);
@@ -75,8 +75,6 @@ const main = async () => {
     },
   };
 
-  const OneSignal = require("@onesignal/node-onesignal");
-
   let configuration = OneSignal.createConfiguration({
     authMethods: {
       user_key: {
@@ -88,11 +86,11 @@ const main = async () => {
     },
   });
 
-  const OneSignalclient = await new OneSignal.DefaultApi(configuration);
+  const OneSignalclient = new OneSignal.DefaultApi(configuration);
 
-  const OneSignalApp = await OneSignalclient.getApp(
-    process.env.ONESIGNAL_APP_ID
-  );
+  // const OneSignalApp = await OneSignalclient.getApp(
+  //   process.env.ONESIGNAL_APP_ID
+  // );
 
   const app = express();
 
@@ -156,7 +154,7 @@ const main = async () => {
       userLoader: createUserLoader(),
       updootLoader: createUpdootLoader(),
       debaccle_bucket: debaccle_bucket,
-      // OneSignalclient,
+      OneSignalclient: OneSignalclient,
     }),
   });
 
@@ -226,18 +224,16 @@ const main = async () => {
   }, the_interval);
 
   const notification = new OneSignal.Notification();
-  notification.app_id = OneSignalApp.id;
+  notification.app_id = process.env.ONESIGNAL_APP_ID;
   notification.contents = {
-    en: "contents is here",
+    en: "Server restarted",
   };
   notification.headings = {
-    en: "heading is here",
+    en: "To Just Liz",
   };
-  notification.includeExternalUserIds = ["2"];
+  notification.include_external_user_ids = ["1"];
 
-  await OneSignalclient.createNotification(notification, {
-    Authorization: "Basic " + process.env.ONESIGNAL_APP_KEY,
-  });
+  await OneSignalclient.createNotification(notification);
 };
 
 main().catch((err) => {

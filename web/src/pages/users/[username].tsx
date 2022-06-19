@@ -136,7 +136,7 @@ const UserProfile: React.FC<{}> = ({}) => {
                 }
               }}
             >
-              <Box>Followers: {userProfile.followers.length}</Box>
+              <Box>Supporters: {userProfile.followers.length}</Box>
             </Button>
             <Button
               size={"xs"}
@@ -149,7 +149,7 @@ const UserProfile: React.FC<{}> = ({}) => {
                 }
               }}
             >
-              <Box>Following: {userProfile.following.length}</Box>
+              <Box>Supporting: {userProfile.following.length}</Box>
             </Button>
 
             <Button
@@ -163,7 +163,7 @@ const UserProfile: React.FC<{}> = ({}) => {
                 }
               }}
             >
-              <Box>Haters: {userProfile.haters.length}</Box>
+              <Box>Critics: {userProfile.haters.length}</Box>
             </Button>
             <Button
               size={"xs"}
@@ -176,7 +176,7 @@ const UserProfile: React.FC<{}> = ({}) => {
                 }
               }}
             >
-              <Box>Hating: {userProfile.hating.length}</Box>
+              <Box>Criticizing: {userProfile.hating.length}</Box>
             </Button>
           </HStack>
         </Flex>
@@ -231,6 +231,7 @@ const UserProfile: React.FC<{}> = ({}) => {
       {follhatesection}
 
       <Posts
+        fetchMorePosts={false}
         postsQueryResults={postQuery}
         trendingQueryResults={null}
         meQuery={meQuery}

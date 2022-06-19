@@ -24,6 +24,19 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({
   const toast = useToast();
 
   let count = 0;
+  let color = undefined;
+
+  if (post.voteStatus != null) {
+    count = post.voteStatus;
+    if (count == 0) {
+      color = "yellow";
+    } else if (count > 0) {
+      color = "green";
+    } else if (count < 0) {
+      color = "red";
+    }
+  }
+
   return (
     <Flex direction="row" justifyContent="center" alignItems="center">
       <IconButton
@@ -34,10 +47,6 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({
             return;
           }
 
-          if (post.voteStatus === 1) {
-            return;
-          }
-
           setLoadingState("updoot-loading");
           const returnvote = await vote({
             variables: {
@@ -45,7 +54,7 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({
               value: 1,
             },
           });
-          setLoadingState("not-loading");
+
           await meQuery.refetch();
 
           if (returnvote.data?.vote.upvotes != post.upvotes) {
@@ -57,8 +66,9 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({
                 isClosable: true,
               });
           }
+          setLoadingState("not-loading");
         }}
-        colorScheme={post.voteStatus === 1 ? "green" : undefined}
+        colorScheme={count >= 0 ? color : undefined}
         isLoading={loadingState === "updoot-loading"}
         aria-label="updoot post"
         icon={<ChevronUpIcon />}
@@ -71,10 +81,6 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({
             return;
           }
 
-          if (post.voteStatus === -1) {
-            return;
-          }
-
           setLoadingState("downdoot-loading");
           const returnvote = await vote({
             variables: {
@@ -82,7 +88,7 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({
               value: -1,
             },
           });
-          setLoadingState("not-loading");
+
           await meQuery.refetch();
 
           if (meQuery.data?.me?.credits)
@@ -94,8 +100,9 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({
                 isClosable: true,
               });
             }
+          setLoadingState("not-loading");
         }}
-        colorScheme={post.voteStatus === -1 ? "red" : undefined}
+        colorScheme={count <= 0 ? color : undefined}
         isLoading={loadingState === "downdoot-loading"}
         aria-label="downdoot post"
         icon={<ChevronDownIcon />}

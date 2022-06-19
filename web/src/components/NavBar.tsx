@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Link,
@@ -17,6 +17,7 @@ import {
   MenuItem,
   MenuDivider,
   Avatar,
+  Text,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
 import {
@@ -42,6 +43,12 @@ import useMobileDetect from "../utils/isMobile";
 import { IMAGE_HOST } from "../utils/constants";
 import { SetNotificationId } from "../utils/SetNotificationId";
 import { NotificationMenuItem } from "./NotificationMenuItem";
+import {
+  BottomNavigation,
+  BottomNavigationItem,
+  BottomNavigationIcon,
+  BottomNavigationLabel,
+} from "chakra-ui-bottom-navigation";
 
 interface NavBarProps {
   deviceType?: string;
@@ -61,11 +68,30 @@ export const NavBar: React.FC<NavBarProps> = ({ meQuery }) => {
 
   let isMobile = useMobileDetect().isMobile();
 
+  // const [showChild, setShowChild] = useState(false);
+  // useEffect(() => {
+  //   setShowChild(true);
+  // }, []);
+
+  // if (!showChild) {
+  //   return null;
+  // }
+
   const path = router.asPath;
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const handleChange = useCallback(
+    (path: any) => {
+      router.push(path);
+    },
+    [router.push]
+  );
+
   let loginbody = null;
+  let moblieNavFooter = <></>;
+  let navHeader = <></>;
+  let mobilePadding = <Box pb={16}></Box>;
   let profilePath = "/users/";
   // data is loading
   if (loading) {
@@ -75,6 +101,48 @@ export const NavBar: React.FC<NavBarProps> = ({ meQuery }) => {
     if (colorMode === "light") {
       colorOfButton = "black";
     }
+
+    navHeader = (
+      <HStack spacing={0} alignItems={"center"}>
+        <HStack as={"nav"} spacing={1} ml={2} mr={2}>
+          <NextLink href="/">
+            <Box>
+              <Button
+                size="md"
+                aria-label="Home"
+                colorScheme={colorMode === "light" ? "darkgray" : ""}
+                textColor={pathname == "/" ? "primary.200" : "white"}
+              >
+                <CgHomeAlt />
+                <Box
+                  ml={1}
+                  pl={"auto"}
+                  pr={"auto"}
+                  display={{ base: "none", md: "flex" }}
+                >
+                  Home
+                </Box>
+              </Button>
+            </Box>
+          </NextLink>
+          <NextLink href="/explore">
+            <Box>
+              <Button
+                size="md"
+                aria-label="Explore"
+                colorScheme={colorMode === "light" ? "darkgray" : ""}
+                textColor={pathname == "/explore" ? "primary.200" : "white"}
+              >
+                <SearchIcon />
+                <Box ml={1} display={{ base: "none", md: "flex" }}>
+                  Explore
+                </Box>
+              </Button>
+            </Box>
+          </NextLink>
+        </HStack>
+      </HStack>
+    );
 
     loginbody = (
       <>
@@ -100,11 +168,33 @@ export const NavBar: React.FC<NavBarProps> = ({ meQuery }) => {
       </>
     );
 
+    if (isMobile) {
+      navHeader = <Text color={"white"}>Debaccle</Text>;
+      mobilePadding = <Box pt={0}> </Box>;
+      moblieNavFooter = (
+        <BottomNavigation
+          value={router.pathname}
+          onChange={handleChange}
+          rounded={"none"}
+          zIndex={100}
+          pb={5}
+        >
+          <BottomNavigationItem value="/">
+            <BottomNavigationIcon as={CgHomeAlt} />
+            <BottomNavigationLabel>Home</BottomNavigationLabel>
+          </BottomNavigationItem>
+
+          <BottomNavigationItem value="/explore">
+            <BottomNavigationIcon as={SearchIcon} />
+            <BottomNavigationLabel>Explore</BottomNavigationLabel>
+          </BottomNavigationItem>
+        </BottomNavigation>
+      );
+    }
     // user is logged in
   } else {
     profilePath += data.me.username;
 
-    // console.log(`${IMAGE_HOST}${data.me.image}`);
     loginbody = (
       <Menu>
         <MenuButton
@@ -121,7 +211,7 @@ export const NavBar: React.FC<NavBarProps> = ({ meQuery }) => {
             src={data.me.image == "" ? "" : `${IMAGE_HOST}${data.me.image}`}
           />
         </MenuButton>
-        <MenuList>
+        <MenuList zIndex={120}>
           <MenuItem
             w={"100%"}
             onClick={async () => {
@@ -138,6 +228,120 @@ export const NavBar: React.FC<NavBarProps> = ({ meQuery }) => {
         </MenuList>
       </Menu>
     );
+
+    navHeader = (
+      <HStack spacing={0} alignItems={"center"}>
+        <HStack as={"nav"} spacing={1} ml={2} mr={2}>
+          <NextLink href="/">
+            <Box>
+              <Button
+                size="md"
+                aria-label="Home"
+                colorScheme={colorMode === "light" ? "darkgray" : ""}
+                textColor={pathname == "/" ? "primary.200" : "white"}
+              >
+                <CgHomeAlt />
+                <Box
+                  ml={1}
+                  pl={"auto"}
+                  pr={"auto"}
+                  display={{ base: "none", md: "flex" }}
+                >
+                  Home
+                </Box>
+              </Button>
+            </Box>
+          </NextLink>
+          <NextLink href="/explore">
+            <Box>
+              <Button
+                size="md"
+                aria-label="Explore"
+                colorScheme={colorMode === "light" ? "darkgray" : ""}
+                textColor={pathname == "/explore" ? "primary.200" : "white"}
+              >
+                <SearchIcon />
+                <Box ml={1} display={{ base: "none", md: "flex" }}>
+                  Explore
+                </Box>
+              </Button>
+            </Box>
+          </NextLink>
+
+          <NextLink href={profilePath}>
+            <Box>
+              <Button
+                size="md"
+                aria-label="Profile"
+                colorScheme={colorMode === "light" ? "darkgray" : ""}
+                textColor={
+                  pathname == "/users/[username]" ? "primary.200" : "white"
+                }
+              >
+                <CgProfile />
+                <Box ml={1} display={{ base: "none", md: "flex" }}>
+                  Profile
+                </Box>
+              </Button>
+            </Box>
+          </NextLink>
+          <NextLink href="/create-post">
+            <Box>
+              <Button
+                size="md"
+                aria-label="Post"
+                colorScheme={colorMode === "light" ? "darkgray" : ""}
+                textColor={pathname == "/create-post" ? "primary.200" : "white"}
+              >
+                <AddIcon />
+                <Box ml={1} display={{ base: "none", md: "flex" }}>
+                  Opinion
+                </Box>
+              </Button>
+            </Box>
+          </NextLink>
+        </HStack>
+      </HStack>
+    );
+
+    if (isMobile) {
+      navHeader = (
+        <Text fontSize={22} color={"white"}>
+          Debaccle
+        </Text>
+      );
+      mobilePadding = <Box pt={0}> </Box>;
+
+      moblieNavFooter = (
+        <BottomNavigation
+          value={router.pathname}
+          onChange={handleChange}
+          rounded={"none"}
+          zIndex={100}
+          pb={5}
+        >
+          <BottomNavigationItem value="/">
+            <BottomNavigationIcon as={CgHomeAlt} />
+            <BottomNavigationLabel>Home</BottomNavigationLabel>
+          </BottomNavigationItem>
+
+          <BottomNavigationItem value="/explore">
+            <BottomNavigationIcon as={SearchIcon} />
+            <BottomNavigationLabel>Explore</BottomNavigationLabel>
+          </BottomNavigationItem>
+
+          <BottomNavigationItem value={profilePath}>
+            <BottomNavigationIcon as={CgProfile} />
+            <BottomNavigationLabel>Profile</BottomNavigationLabel>
+          </BottomNavigationItem>
+
+          <BottomNavigationItem value="/create-post">
+            <BottomNavigationIcon as={AddIcon} />
+            <BottomNavigationLabel>Opinion</BottomNavigationLabel>
+          </BottomNavigationItem>
+        </BottomNavigation>
+      );
+    }
   }
   // {
   //   50: '#eef1f9',
@@ -153,139 +357,68 @@ export const NavBar: React.FC<NavBarProps> = ({ meQuery }) => {
   // }
 
   return (
-    <Box
-      bg={useColorModeValue("#21242c", "#1b1c21")}
-      w={isMobile ? "100vp" : "100%"}
-    >
-      <Box>
-        <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-          <IconButton
-            size={"md"}
-            ml={2}
-            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-            aria-label={"Open Menu"}
-            display={{ md: "none" }}
-            onClick={isOpen ? onClose : onOpen}
-            colorScheme={colorMode === "light" ? "darkgray" : ""}
-            textColor={"white"}
-          />
-          <Box display={{ base: "none", md: "flex" }}>
-            <Box mt={1} ml={4} mr={2} fontSize={20} textColor={"white"}>
-              <NextLink href={"/about"}>Debaccle</NextLink>
-            </Box>
-            <Button
-              onClick={toggleColorMode}
+    <>
+      <Box
+        bg={useColorModeValue("#21242c", "#1b1c21")}
+        w={isMobile ? "100vp" : "100%"}
+        top={isMobile ? undefined : 0}
+        position={isMobile ? undefined : "fixed"}
+        zIndex={50}
+      >
+        <Box>
+          <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
+            <IconButton
+              size={"md"}
+              ml={2}
+              icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+              aria-label={"Open Menu"}
+              display={{ md: "none" }}
+              onClick={isOpen ? onClose : onOpen}
               colorScheme={colorMode === "light" ? "darkgray" : ""}
               textColor={"white"}
-            >
-              {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-            </Button>
-          </Box>
-
-          <HStack spacing={0} alignItems={"center"}>
-            <HStack as={"nav"} spacing={1} ml={2} mr={2}>
-              <NextLink href="/">
-                <Box>
-                  <Button
-                    size="md"
-                    aria-label="Explore"
-                    colorScheme={colorMode === "light" ? "darkgray" : ""}
-                    textColor={pathname == "/" ? "primary.200" : "white"}
-                  >
-                    <CgHomeAlt />
-                    <Box
-                      ml={1}
-                      pl={"auto"}
-                      pr={"auto"}
-                      display={{ base: "none", md: "flex" }}
-                    >
-                      Home
-                    </Box>
-                  </Button>
-                </Box>
-              </NextLink>
-              <NextLink href="/explore">
-                <Box>
-                  <Button
-                    size="md"
-                    aria-label="Explore"
-                    colorScheme={colorMode === "light" ? "darkgray" : ""}
-                    textColor={pathname == "/explore" ? "primary.200" : "white"}
-                  >
-                    <SearchIcon />
-                    <Box ml={1} display={{ base: "none", md: "flex" }}>
-                      Explore
-                    </Box>
-                  </Button>
-                </Box>
-              </NextLink>
-              {data?.me ? (
-                <>
-                  <NextLink href={profilePath}>
-                    <Box>
-                      <Button
-                        size="md"
-                        aria-label="Explore"
-                        colorScheme={colorMode === "light" ? "darkgray" : ""}
-                        textColor={
-                          pathname == "/users/[username]"
-                            ? "primary.200"
-                            : "white"
-                        }
-                      >
-                        <CgProfile />
-                        <Box ml={1} display={{ base: "none", md: "flex" }}>
-                          Profile
-                        </Box>
-                      </Button>
-                    </Box>
-                  </NextLink>
-                  <NextLink href="/create-post">
-                    <Box>
-                      <Button
-                        size="md"
-                        aria-label="Post"
-                        colorScheme={colorMode === "light" ? "darkgray" : ""}
-                        textColor={
-                          pathname == "/create-post" ? "primary.200" : "white"
-                        }
-                      >
-                        <AddIcon />
-                        <Box ml={1} display={{ base: "none", md: "flex" }}>
-                          Post
-                        </Box>
-                      </Button>
-                    </Box>
-                  </NextLink>{" "}
-                </>
-              ) : null}
-            </HStack>
-          </HStack>
-          <Flex alignItems={"center"}>
-            <Box mr={2} textColor={"white"}>
-              {data?.me?.username}
-            </Box>
-
-            {loginbody}
-          </Flex>
-        </Flex>
-
-        {isOpen ? (
-          <Box pb={4} display={{ md: "none" }}>
-            <Stack as={"nav"} spacing={4}>
-              <Button onClick={toggleColorMode}>
-                {colorMode === "light" ? "Dark Mode  " : "Light Mode  "}
-                {colorMode === "light" ? (
-                  <MoonIcon ml={2} />
-                ) : (
-                  <SunIcon ml={2} />
-                )}
+            />
+            <Box display={{ base: "none", md: "flex" }}>
+              <Box mt={1} ml={4} mr={2} fontSize={20} textColor={"white"}>
+                <NextLink href={"/about"}>Debaccle</NextLink>
+              </Box>
+              <Button
+                onClick={toggleColorMode}
+                colorScheme={colorMode === "light" ? "darkgray" : ""}
+                textColor={"white"}
+              >
+                {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
               </Button>
-              <Button onClick={() => router.push("/about")}>About</Button>
-            </Stack>
-          </Box>
-        ) : null}
+            </Box>
+            {navHeader}
+
+            <Flex alignItems={"center"}>
+              <Box mr={2} textColor={"white"}>
+                {data?.me?.username}
+              </Box>
+
+              {loginbody}
+            </Flex>
+          </Flex>
+
+          {isOpen ? (
+            <Box pb={4} display={{ md: "none" }}>
+              <Stack as={"nav"} spacing={4}>
+                <Button onClick={toggleColorMode}>
+                  {colorMode === "light" ? "Dark Mode  " : "Light Mode  "}
+                  {colorMode === "light" ? (
+                    <MoonIcon ml={2} />
+                  ) : (
+                    <SunIcon ml={2} />
+                  )}
+                </Button>
+                <Button onClick={() => router.push("/about")}>About</Button>
+              </Stack>
+            </Box>
+          ) : null}
+        </Box>
       </Box>
-    </Box>
+      {mobilePadding}
+      {moblieNavFooter}
+    </>
   );
 };

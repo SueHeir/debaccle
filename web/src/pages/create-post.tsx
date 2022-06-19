@@ -104,6 +104,7 @@ const CreatePost: React.FC<{}> = ({}) => {
       >
         {({ isSubmitting }) => (
           <Form>
+            <Box fontSize={23}>Post an Opinion</Box>
             <Box m={1}>
               <InputField name="title" placeholder="title" label="Title" />
             </Box>
